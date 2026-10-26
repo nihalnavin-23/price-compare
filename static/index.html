@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceWise - All-Electronics Multi-Store Price Comparison & Price History</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #d1fae5;
+            --bg: #090d16;
+            --card-bg: #111827;
+            --card-border: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --gold: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 25px 20px 60px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 40%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* Category Filter Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-tab {
+            background: #111827;
+            border: 1px solid #1f2937;
+            color: #9ca3af;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .cat-tab:hover {
+            color: #fff;
+            border-color: #374151;
+        }
+
+        .cat-tab.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        /* Search Section */
+        .search-container {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .search-icon {
+            padding-left: 14px;
+            font-size: 20px;
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 16px;
+            padding: 12px 14px;
+            font-weight: 500;
+        }
+
+        .search-input::placeholder {
+            color: #4b5563;
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            outline: none;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-btn:hover {
+            background: #059669;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* Products Chips Bar */
+        .products-chips-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 25px;
+            min-height: 40px;
+        }
+
+        .p-chip {
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .p-chip:hover {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Loading Spinner */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #1f2937;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 14px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error Notification Section */
+        .error-section {
+            display: none;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1.5px solid rgba(239, 68, 68, 0.4);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 25px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .error-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .error-icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .error-details h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f87171;
+            margin-bottom: 6px;
+        }
+
+        .error-details p {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .error-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .error-suggestions span {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .error-chip {
+            background: #1e293b;
+            color: #38bdf8;
+            border: 1px solid #334155;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .error-chip:hover {
+            background: #38bdf8;
+            color: #000;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Best Deal Hero Banner */
+        .best-deal-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border: 1.5px solid var(--primary);
+            border-radius: 16px;
+            padding: 24px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .banner-info .cat-tag {
+            font-size: 11px;
+            font-weight: 700;
+            background: #0369a1;
+            color: #e0f2fe;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .banner-info h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .banner-info p {
+            color: #a7f3d0;
+            font-size: 15px;
+        }
+
+        .banner-action .btn-buy-best {
+            background: var(--primary);
+            color: #064e3b;
+            font-size: 15px;
+            font-weight: 800;
+            padding: 14px 26px;
+            border-radius: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .banner-action .btn-buy-best:hover {
+            background: #fff;
+            color: #000;
+            transform: scale(1.03);
+        }
+
+        /* Price History Section */
+        .history-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px 26px;
+            margin-bottom: 25px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .history-title h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .advice-badge-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .h-stat {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .h-stat .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .h-stat .value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        /* SVG Line Chart */
+        .chart-box {
+            background: #0b1120;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px 15px 12px;
+            margin-bottom: 14px;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 160px;
+            overflow: visible;
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            margin-top: 8px;
+        }
+
+        .chart-labels span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .advice-footer {
+            font-size: 13px;
+            color: #cbd5e1;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Product Comparison Grid */
+        .comparison-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .store-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .store-card.is-best {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.03);
+            position: relative;
+        }
+
+        .rank-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+
+        .rank-best {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .rank-other {
+            background: #374151;
+            color: #9ca3af;
+        }
+
+        .store-main {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .store-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+            background: #1f2937;
+            color: #fff;
+        }
+
+        .store-details h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .store-details .meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rating-star {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .price-col {
+            text-align: right;
+            margin-right: 20px;
+        }
+
+        .current-price {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .store-card.is-best .current-price {
+            color: var(--primary);
+        }
+
+        .mrp-strike {
+            font-size: 13px;
+            color: #6b7280;
+            text-decoration: line-through;
+            margin-right: 6px;
+        }
+
+        .discount-tag {
+            font-size: 12px;
+            font-weight: 700;
+            color: #34d399;
+        }
+
+        .btn-store-visit {
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #f3f4f6;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-store-visit:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .store-card.is-best .btn-store-visit {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        .store-card.is-best .btn-store-visit:hover {
+            background: #059669;
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #4b5563;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand-badge">⚡ Live Price Comparison & Historical Tracker</div>
+            <h1>Smart PriceDrop Engine</h1>
+            <p>Smartphones • Laptops • Audio • TVs • ACs • Refrigerators • Washing Machines • Purifiers • Appliances</p>
+        </header>
+
+        <!-- Category Filter Tabs -->
+        <div class="category-tabs" id="categoryTabs">
+            <button class="cat-tab active" onclick="selectCategory('All')">🌟 All Electronics</button>
+            <button class="cat-tab" onclick="selectCategory('Appliances')">❄️ Home & Kitchen Appliances</button>
+            <button class="cat-tab" onclick="selectCategory('Smartphones')">📱 Smartphones</button>
+            <button class="cat-tab" onclick="selectCategory('Laptops')">💻 Laptops</button>
+            <button class="cat-tab" onclick="selectCategory('Audio')">🎧 Audio & Speakers</button>
+            <button class="cat-tab" onclick="selectCategory('Smartwatches')">⌚ Smartwatches</button>
+            <button class="cat-tab" onclick="selectCategory('Tablets')">📱 Tablets & iPads</button>
+            <button class="cat-tab" onclick="selectCategory('Gaming')">🎮 Gaming Consoles</button>
+            <button class="cat-tab" onclick="selectCategory('TVs')">📺 Smart TVs</button>
+            <button class="cat-tab" onclick="selectCategory('Cameras')">📷 Cameras & Drones</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="productInput" class="search-input" placeholder="Search product (e.g. LG AC, Daikin Inverter, Samsung Refrigerator, Bosch Washing Machine, iPhone 17)..." autocomplete="off">
+            <button class="search-btn" onclick="executeSearch()">Compare Prices</button>
+        </div>
+
+        <!-- Products Chips Bar for instant one-click comparison -->
+        <div class="products-chips-bar" id="productsChips">
+            <!-- Dynamically populated from catalog -->
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="loader">
+            <div class="spinner"></div>
+            <p style="color: var(--text-muted); font-size: 14px;">Comparing prices & analyzing historical trends across Amazon, Flipkart, Croma, Reliance Digital & Tata CLiQ...</p>
+        </div>
+
+        <!-- Error Notification Section -->
+        <div id="errorSection" class="error-section">
+            <div class="error-content">
+                <div class="error-icon">⚠️</div>
+                <div class="error-details">
+                    <h3>Product Not Found</h3>
+                    <p id="errorMessage">We couldn't find price data for this item. Please enter a valid electronic product or select from the categories above.</p>
+                    <div class="error-suggestions">
+                        <span>Try searching:</span>
+                        <span class="error-chip" onclick="quickFill('Google Pixel 9 Pro')">📱 Google Pixel 9 Pro</span>
+                        <span class="error-chip" onclick="quickFill('LG 1.5 Ton AC')">❄️ LG Inverter AC</span>
+                        <span class="error-chip" onclick="quickFill('Bosch Washing Machine')">🧺 Bosch Front Load</span>
+                        <span class="error-chip" onclick="quickFill('Samsung Double Door Refrigerator')">🧊 Samsung Refrigerator</span>
+                        <span class="error-chip" onclick="quickFill('iPhone 17')">📱 iPhone 17</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="results-section">
+            <!-- Best Deal Banner -->
+            <div class="best-deal-banner" id="bestDealBanner">
+                <div class="banner-info">
+                    <span class="cat-tag" id="bannerCategory">Category</span>
+                    <h2 id="bannerTitle">Buy on Flipkart for ₹81,999</h2>
+                    <p id="bannerSubtitle">Verified lowest rate across all major retailers.</p>
+                </div>
+                <div class="banner-action">
+                    <a href="#" id="bannerBuyBtn" target="_blank" class="btn-buy-best">
+                        Buy Now at Best Price ↗
+                    </a>
+                </div>
+            </div>
+
+            <!-- Price History & Trend Tracker Card -->
+            <div class="history-card" id="historyCard">
+                <div class="history-header">
+                    <div class="history-title">
+                        <h3>📈 6-Month Price History & Trend Analysis</h3>
+                        <p>Track historical price drops to know if right now is the best time to purchase.</p>
+                    </div>
+                    <div class="advice-badge-box" id="adviceBadge">
+                        🔥 All-Time Low
+                    </div>
+                </div>
+
+                <div class="history-stats">
+                    <div class="h-stat">
+                        <div class="label">Lowest Recorded (6-Mo)</div>
+                        <div class="value" id="statLowest" style="color: #34d399;">₹0</div>
+                    </div>
+                    <div class="h-stat">
+                        <div class="label">Average Price</div>
+                        <div class="value" id="statAvg" style="color: #38bdf8;">₹0</div>
+                    </div>
+                    <div class="h-stat">
+                        <div class="label">Highest Recorded</div>
+                        <div class="value" id="statHighest" style="color: #f87171;">₹0</div>
+                    </div>
+                </div>
+
+                <!-- SVG Graph Container -->
+                <div class="chart-box">
+                    <svg class="chart-svg" id="priceSvg" viewBox="0 0 700 160">
+                        <!-- Path dynamically drawn -->
+                    </svg>
+                    <div class="chart-labels" id="chartMonths">
+                        <!-- Month labels -->
+                    </div>
+                </div>
+
+                <div class="advice-footer" id="adviceFooter">
+                    💡 <b>Buying Advice:</b> <span id="adviceText">Great time to buy!</span>
+                </div>
+            </div>
+
+            <!-- Stores List -->
+            <div class="comparison-grid" id="storesList">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+
+        <footer>
+            PriceWise Comparison System • Live Deep Links directly redirect to verified official store pages.
+        </footer>
+    </div>
+
+    <script>
+        const storeLogos = {
+            "Amazon India": "📦",
+            "Flipkart": "🛍️",
+            "Croma": "⚡",
+            "Reliance Digital": "🏪",
+            "Tata CLiQ": "🏷️"
+        };
+
+        let catalogData = {};
+        let currentCategory = "All";
+
+        function formatINR(val) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+        }
+
+        async function initCatalog() {
+            try {
+                const res = await fetch("/api/catalog");
+                catalogData = await res.json();
+                renderCategoryChips();
+            } catch (err) {
+                console.error("Failed to load catalog:", err);
+            }
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll(".cat-tab").forEach(tab => {
+                tab.classList.toggle("active", tab.innerText.includes(cat) || (cat === "All" && tab.innerText.includes("All")));
+            });
+            renderCategoryChips();
+        }
+
+        function quickFill(term) {
+            document.getElementById("productInput").value = term;
+            executeSearch();
+        }
+
+        function renderCategoryChips() {
+            const container = document.getElementById("productsChips");
+            container.innerHTML = "";
+
+            let items = [];
+            if (currentCategory === "All") {
+                Object.values(catalogData).forEach(catList => {
+                    items.push(...catList);
+                });
+            } else {
+                items = catalogData[currentCategory] || [];
+            }
+
+            // Display all category items (up to 60) so nothing is hidden
+            items.slice(0, 60).forEach(item => {
+                const chip = document.createElement("span");
+                chip.className = "p-chip";
+                chip.innerHTML = `${item.title.split('(')[0].trim()} <b style="color:var(--primary); font-size:11px;">${formatINR(item.lowest_price)}</b>`;
+                chip.onclick = () => {
+                    document.getElementById("productInput").value = item.search_key;
+                    executeSearch();
+                };
+                container.appendChild(chip);
+            });
+        }
+
+        document.getElementById("productInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                executeSearch();
+            }
+        });
+
+        async function executeSearch() {
+            const query = document.getElementById("productInput").value.trim();
+            if (!query) return;
+
+            const loader = document.getElementById("loader");
+            const resultsSection = document.getElementById("resultsSection");
+            const errorSection = document.getElementById("errorSection");
+
+            loader.style.display = "block";
+            resultsSection.style.display = "none";
+            errorSection.style.display = "none";
+
+            try {
+                const response = await fetch(`/api/compare?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById("errorMessage").innerText = data.error;
+                    errorSection.style.display = "block";
+                    errorSection.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+
+                renderResults(data);
+            } catch (err) {
+                console.error("Fetch error:", err);
+                document.getElementById("errorMessage").innerText = "Unable to connect to comparison server. Please try again.";
+                errorSection.style.display = "block";
+            } finally {
+                loader.style.display = "none";
+            }
+        }
+
+        function renderPriceHistoryChart(historyData) {
+            const history = historyData.history;
+            const svg = document.getElementById("priceSvg");
+            const monthsContainer = document.getElementById("chartMonths");
+
+            document.getElementById("statLowest").innerText = formatINR(historyData.lowest_recorded);
+            document.getElementById("statAvg").innerText = formatINR(historyData.average_price);
+            document.getElementById("statHighest").innerText = formatINR(historyData.highest_recorded);
+
+            document.getElementById("adviceBadge").innerText = historyData.advice_badge;
+            document.getElementById("adviceText").innerText = historyData.advice_text;
+
+            const prices = history.map(h => h.price);
+            const minP = Math.min(...prices) * 0.96;
+            const maxP = Math.max(...prices) * 1.04;
+            const pRange = maxP - minP || 1;
+
+            const width = 700;
+            const height = 150;
+            const paddingX = 40;
+            const paddingY = 25;
+
+            const points = history.map((pt, i) => {
+                const x = paddingX + (i / (history.length - 1)) * (width - 2 * paddingX);
+                const y = height - paddingY - ((pt.price - minP) / pRange) * (height - 2 * paddingY);
+                return { x, y, price: pt.price, month: pt.month };
+            });
+
+            // Build path string
+            let pathD = `M ${points[0].x} ${points[0].y}`;
+            for (let i = 1; i < points.length; i++) {
+                pathD += ` L ${points[i].x} ${points[i].y}`;
+            }
+
+            // Fill area
+            let areaD = `${pathD} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
+
+            let svgContent = `
+                <defs>
+                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                    </linearGradient>
+                </defs>
+                <path d="${areaD}" fill="url(#chartGrad)"/>
+                <path d="${pathD}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+            `;
+
+            // Draw dots & value labels
+            points.forEach(pt => {
+                svgContent += `
+                    <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="#10b981" stroke="#090d16" stroke-width="2"/>
+                    <text x="${pt.x}" y="${pt.y - 10}" fill="#94a3b8" font-size="11" font-weight="600" text-anchor="middle">₹${pt.price.toLocaleString('en-IN')}</text>
+                `;
+            });
+
+            svg.innerHTML = svgContent;
+
+            // Render month labels
+            monthsContainer.innerHTML = history.map(h => `<span>${h.month}</span>`).join("");
+        }
+
+        function renderResults(data) {
+            const resultsSection = document.getElementById("resultsSection");
+            const storesList = document.getElementById("storesList");
+            const bannerTitle = document.getElementById("bannerTitle");
+            const bannerSubtitle = document.getElementById("bannerSubtitle");
+            const bannerBuyBtn = document.getElementById("bannerBuyBtn");
+            const bannerCategory = document.getElementById("bannerCategory");
+
+            const bestStore = data.comparisons[0];
+
+            bannerCategory.innerText = data.category || "Electronics";
+            bannerTitle.innerText = `Buy on ${bestStore.store} for ${formatINR(bestStore.price)}`;
+            bannerSubtitle.innerText = data.max_savings > 0 
+                ? `You save ${formatINR(data.max_savings)} compared to highest store (${formatINR(data.highest_price)})!`
+                : `Verified lowest rate across all major retailers.`;
+            bannerBuyBtn.href = bestStore.buy_url;
+
+            // Render Price History Chart
+            if (data.price_history) {
+                renderPriceHistoryChart(data.price_history);
+            }
+
+            storesList.innerHTML = "";
+
+            data.comparisons.forEach((item, index) => {
+                const isBest = index === 0;
+                const card = document.createElement("div");
+                card.className = `store-card ${isBest ? 'is-best' : ''}`;
+
+                const logo = storeLogos[item.store] || "🛒";
+
+                card.innerHTML = `
+                    <div class="store-main">
+                        <div class="store-icon">${logo}</div>
+                        <div class="store-details">
+                            <span class="rank-badge ${isBest ? 'rank-best' : 'rank-other'}">
+                                ${isBest ? '🏆 BEST PRICE' : '#' + (index + 1) + ' OPTION'}
+                            </span>
+                            <h3>${item.store}</h3>
+                            <div class="meta">
+                                <span class="rating-star">★ ${item.rating}</span>
+                                <span>•</span>
+                                <span>${item.delivery}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="price-col">
+                            <div class="current-price">${formatINR(item.price)}</div>
+                            <div>
+                                <span class="mrp-strike">${formatINR(item.mrp)}</span>
+                                <span class="discount-tag">${item.discount_pct}% OFF</span>
+                            </div>
+                        </div>
+                        <a href="${item.buy_url}" target="_blank" class="btn-store-visit">
+                            Buy on ${item.store.split(' ')[0]} ↗
+                        </a>
+                    </div>
+                `;
+
+                storesList.appendChild(card);
+            });
+
+            resultsSection.style.display = "block";
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize on page load
+        initCatalog();
+    </script>
+</body>
+</html>
